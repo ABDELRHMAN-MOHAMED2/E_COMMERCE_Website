@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Jinja block for child templates to inject their specific page titles. -->
+    <title>{% block title %}goodStore{% endblock %}</title>
+    <!-- Load Inter font family from Google Fonts for a modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to the main style.css using Flask's url_for to reliably resolve the static path -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <!-- Persistent Header/Navbar displayed across all pages -->
+    <header>
+        <div class="navbar">
+            <div class="nav-left">
+                <!-- Logo linking back to the homepage -->
+                <a href="{{ url_for('main.home') }}">good<span>Store</span></a>
+            </div>
+            <!-- Central search bar structure (UI only, no backend functionality implemented yet) -->
+            <div class="nav-search" style="flex-grow: 1; margin: 0 20px;">
+                <input type="text" placeholder="Search goodStore"
+                    style="width: 100%; padding: 10px; border-radius: 4px; border: none; font-family: inherit;">
+            </div>
+            <!-- Right-side navigation links. Layout changes whether user is logged in or not -->
+            <div class="nav-links">
+                <!-- Jinja if-condition to check the Flask-Login user state -->
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main.home') }}">
+                    <!-- Greet the specific logged-in user -->
+                    <span>Hello, {{ current_user.username }}</span>
+                    <strong>Account & Lists</strong>
+                </a>
+                <a href="{{ url_for('main.cart') }}">
+                    <span>Cart</span>
+                    <!-- Display dynamic cart_count injected globally by inject_cart_count context processor -->
+                    <strong class="cart-count">{{ cart_count }}</strong>
+                </a>
+                <a href="{{ url_for('main.logout') }}"><strong>Logout</strong></a>
+                {% else %}
+                <!-- Options for guests/not-logged-in users -->
+                <a href="{{ url_for('main.login') }}">
+                    <span>Hello, sign in</span>
+                    <strong>Account & Lists</strong>
+                </a>
+                <a href="{{ url_for('main.cart') }}">
+                    <span>Cart</span>
+                    <!-- Hardcoded 0 since guests cannot have cart items currently -->
+                    <strong class="cart-count">0</strong>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Secondary Sub-Navigation Bar (UI Mockup) -->
+        <div class="sub-nav">
+            <a href="#">All</a>
+            <a href="#">Today's Deals</a>
+            <a href="#">Customer Service</a>
+            <a href="#">Registry</a>
+            <a href="#">Gift Cards</a>
+            <a href="#">Sell</a>
+        </div>
+    </header>
+
+    <!-- Main content area wrapper -->
+    <main class="container">
+        <!-- Global Flash Messages Area -->
+        <div class="flash-messages">
+            <!-- Retrieve any messages "flashed" by the backend routes -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            <!-- If there are messages, loop through and display them with corresponding boostrap-like alert styling -->
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Primary Jinja block where child templates (like home, login, etc) will inject their specific HTML content -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Persistent Global Footer -->
+    <footer
+        style="background-color: var(--nav-sub-bg); color: white; text-align: center; padding: 20px; margin-top: 40px;">
+        <p>&copy; 2024 goodStore. All rights reserved. (Inspired by Amazon)</p>
+    </footer>
+
+    <!-- Include main JavaScript package for frontend interactions (like fading out alerts) -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

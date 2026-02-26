@@ -1,0 +1,71 @@
+<!-- Inherit the surrounding layout structure from base.html -->
+{% extends 'base.html' %}
+
+<!-- Inject this specific cart UI into the 'content' block of base.html -->
+{% block content %}
+<div class="cart-container">
+    <h2>Shopping Cart</h2>
+
+    <!-- Conditional check: Does the user have anything in their cart? -->
+    {% if cart_items %}
+    <div style="text-align: right; margin-bottom: 10px; color: var(--text-muted);">Price</div>
+    <hr style="border: 0; border-top: 1px solid var(--border-color);">
+
+    <!-- Loop through all CartItem records passed in from the route -->
+    {% for item in cart_items %}
+    <div class="cart-item">
+        <!-- Display product image with fallback placeholder handled by an inline onerror JS script -->
+        <img src="{{ url_for('static', filename='images/' + item.product.image_file) }}" alt="{{ item.product.title }}"
+            onerror="this.src='https://via.placeholder.com/80x80?text=Img'">
+
+        <div class="cart-details">
+            <!-- Link directly to the detailed view of the specific product -->
+            <a href="{{ url_for('main.product_view', product_id=item.product.id) }}" class="product-title"
+                style="font-size: 1.2rem; display: block;">{{ item.product.title }}</a>
+            <p class="text-success" style="color: green; font-size: 0.9rem; margin-top: 5px;">In Stock</p>
+
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+                <!-- Display the requested quantity stored in the cart item record -->
+                <span>Qty: <strong>{{ item.quantity }}</strong></span>
+
+                <!-- Form to entirely remove this specific item stack from the cart -->
+                <form action="{{ url_for('main.remove_from_cart', item_id=item.id) }}" method="POST"
+                    style="display:inline;">
+                    <!-- Submitting this triggers the remove_from_cart route and deletes the record -->
+                    <button type="submit"
+                        style="background:none; border:none; color:#007185; cursor:pointer; font-size: 0.9rem; padding: 0; text-decoration: underline;">Delete</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Format and display individual item price to 2 decimal places -->
+        <div style="font-weight: bold; font-size: 1.2rem; min-width: 80px; text-align: right;">${{
+            "%.2f"|format(item.product.price) }}</div>
+    </div>
+    {% endfor %}
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin-top: 20px;">
+
+    <div class="cart-total">
+        <!-- Display aggregate totals previously computed in the python route calculation -->
+        Subtotal ({{ cart_count }} items): ${{ "%.2f"|format(total) }}
+    </div>
+    <div style="margin-top: 20px; text-align: right;">
+        <!-- Checkout logic form: triggers order creation -->
+        <form action="{{ url_for('main.checkout') }}" method="POST">
+            <button type="submit" class="btn btn-primary" style="font-size: 1.1rem; padding: 10px 30px;">Proceed to
+                checkout</button>
+        </form>
+    </div>
+
+    <!-- Fallback view if the query returns an empty cart list -->
+    {% else %}
+    <br>
+    <p style="font-size: 1.1rem;">Your Amazon Cart is empty.</p>
+    <p><a href="{{ url_for('main.home') }}" style="color:#007185; text-decoration: none;">Continue shopping</a></p>
+
+    <!-- End of the cart_items presence conditional logic -->
+    {% endif %}
+</div>
+<!-- End block injection -->
+{% endblock %}

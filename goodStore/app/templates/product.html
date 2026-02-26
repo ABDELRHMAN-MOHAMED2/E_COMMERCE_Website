@@ -1,0 +1,57 @@
+<!-- Inject content into the base structure -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="product-page">
+    <!-- Left Column: Large Product Imagery -->
+    <div class="image-section">
+        <!-- Render product photo, reverting to a dynamically sized placeholder if an image is unavilable -->
+        <img src="{{ url_for('static', filename='images/' + product.image_file) }}" alt="{{ product.title }}"
+            onerror="this.src='https://via.placeholder.com/500x500?text={{ product.title }}'">
+    </div>
+
+    <!-- Middle Column: Product Specifications and written details -->
+    <div class="details-section">
+        <!-- Access data embedded in the `product` object directly -->
+        <h2>{{ product.title }}</h2>
+        <!-- Access the parent Category's data through the SQLAlchemy foreign key relationship mapping -->
+        <a href="{{ url_for('main.category_view', category_id=product.category_id) }}"
+            style="color: #007185; text-decoration: none;">Visit the {{ product.category_ref.name }} Store</a>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+        <p class="product-price" style="font-size: 1.8rem;">${{ "%.2f"|format(product.price) }}</p>
+        <!-- Retain formatting / newlines using CSS pre-wrap for the text area product description -->
+        <p style="font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap;">{{ product.description }}</p>
+    </div>
+
+    <!-- Right Column: Checkout / Buy Box widget -->
+    <div class="buy-box">
+        <h3 class="product-price">${{ "%.2f"|format(product.price) }}</h3>
+        <p class="text-success" style="color: green; font-weight: bold; margin-bottom: 15px;">In Stock.</p>
+
+        <!-- Add To Cart Form: Submits quantity via POST to update session cart -->
+        <form action="{{ url_for('main.add_to_cart', product_id=product.id) }}" method="POST">
+            <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <!-- Select drop down allowing multiple purchases simultaneously -->
+                <select name="quantity" id="quantity" class="form-control" style="width: auto; display: inline-block;">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <!-- Submits the form data mapping to 'quantity' variable retrieved inside routes.py -->
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">Add to Cart</button>
+        </form>
+
+        <!-- Dummy visual indicators resembling a real ecommerce platform -->
+        <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
+            <p>Secure transaction</p>
+            <p>Ships from goodStore</p>
+            <p>Sold by goodStore</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

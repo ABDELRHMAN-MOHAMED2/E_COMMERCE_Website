@@ -1,0 +1,41 @@
+<!-- Inherit the surrounding layout structure from base.html -->
+{% extends 'base.html' %}
+
+<!-- Inject this specific homepage UI into the 'content' block of base.html -->
+{% block content %}
+<div class="mb-2">
+    <h2>Shop by Category</h2>
+    <!-- Horizontal scrolling container for category badges -->
+    <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">
+        <!-- Loop over all available categories fetched in the backend route -->
+        {% for category in categories %}
+        <a href="{{ url_for('main.category_view', category_id=category.id) }}" class="btn btn-secondary">{{
+            category.name }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<h2>Featured Products</h2>
+<!-- CSS Grid designed to hold multiple product cards -->
+<div class="product-grid">
+    <!-- Iterate over the limited selection of featured products passed from the route -->
+    {% for product in featured_products %}
+    <div class="product-card">
+        <!-- Load image safely or catch errors to load a placeholder -->
+        <img src="{{ url_for('static', filename='images/' + product.image_file) }}" alt="{{ product.title }}"
+            class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text={{ product.title }}'">
+
+        <!-- Interactive link opening the dedicated product view -->
+        <a href="{{ url_for('main.product_view', product_id=product.id) }}" class="product-title">{{ product.title
+            }}</a>
+
+        <div class="product-price">${{ "%.2f"|format(product.price) }}</div>
+
+        <!-- Form to add this specific item directly to the user's shopping cart -->
+        <form action="{{ url_for('main.add_to_cart', product_id=product.id) }}" method="POST">
+            <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

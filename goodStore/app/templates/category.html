@@ -1,0 +1,40 @@
+<!-- Inherit global page layout elements -->
+{% extends 'base.html' %}
+
+<!-- Provide content specific to viewing products inside a defined category -->
+{% block content %}
+<div class="mb-2">
+    <!-- Read the database variables mapped from the backend `category` object -->
+    <h2>{{ category.name }}</h2>
+    <p class="text-muted">{{ category.description }}</p>
+</div>
+
+<!-- Container grid designed in CSS to wrap product cards automatically -->
+<div class="product-grid">
+    <!-- Iterate over the 'products' relationship attribute defined in models.py -->
+    {% for product in category.products %}
+    <div class="product-card">
+        <!-- Render product image, using an onerror handler to inject a placeholder if missing -->
+        <img src="{{ url_for('static', filename='images/' + product.image_file) }}" alt="{{ product.title }}"
+            class="product-image" onerror="this.src='https://via.placeholder.com/300x200?text={{ product.title }}'">
+
+        <!-- Product title acting as a link to the standalone product view page -->
+        <a href="{{ url_for('main.product_view', product_id=product.id) }}" class="product-title">{{ product.title
+            }}</a>
+
+        <!-- Output the formatted decimal price -->
+        <div class="product-price">${{ "%.2f"|format(product.price) }}</div>
+
+        <!-- Dedicated form per-product for the Add to Cart action -->
+        <form action="{{ url_for('main.add_to_cart', product_id=product.id) }}" method="POST">
+            <!-- Adding item relies on form submission, securely initiating a backend state change -->
+            <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
+        </form>
+    </div>
+
+    <!-- Jinja's special for-else loop. This triggers if the given category has literally zero products -->
+    {% else %}
+    <p>No products available in this category.</p>
+    {% endfor %}
+</div>
+{% endblock %}
